@@ -1,0 +1,115 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: interview_coach_postgres
+    environment:
+      POSTGRES_USER: interview_coach
+      POSTGRES_PASSWORD: secure_password_change_me
+      POSTGRES_DB: interview_coach
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U interview_coach"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - interview_coach_network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: interview_coach_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - interview_coach_network
+
+  # Ollama (Local LLM)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: interview_coach_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+    networks:
+      - interview_coach_network
+
+  # FastAPI Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: interview_coach_backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://interview_coach:secure_password_change_me@postgres:5432/interview_coach
+      REDIS_URL: redis://redis:6379
+      OLLAMA_API_URL: http://ollama:11434
+      JWT_SECRET_KEY: your-secret-key-change-in-production
+      ENVIRONMENT: development
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - interview_coach_network
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: interview_coach_frontend
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_API_URL: http://localhost:8000/api/v1
+      REACT_APP_WS_URL: ws://localhost:8000/ws
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    command: npm start
+    networks:
+      - interview_coach_network
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: interview_coach_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deployment/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - interview_coach_network
+
+volumes:
+  postgres_data:
+  ollama_data:
+
+networks:
+  interview_coach_network:
+    driver: bridge

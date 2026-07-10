@@ -1,0 +1,123 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+PIPFILE.lock
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.production
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.iml
+.gradle
+
+# Node
+node_modules/
+npm-debug.log
+npm-debug.log.*
+yarn-error.log
+yarn-error.log.*
+.next/
+out/
+dist/
+build/
+.turbo
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.postgresql
+
+# Vector DB
+chroma_data/
+faiss_index/
+.chroma
+
+# ML Models
+models/
+*.bin
+*.pt
+*.pth
+*.h5
+*.ckpt
+*.safetensors
+
+# Logs
+logs/
+*.log
+app.log
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+.pytest_cache/
+.mypy_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Testing
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# Docker
+.dockerignore
+.docker
+
+# Celery
+celerybeat-schedule
+dump.rdb
+
+# SageMath parsed files
+.sage.py
+
+# Uploads
+uploads/
+temp/
+files/
+
+# Build artifacts
+*.o
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
